@@ -6,6 +6,7 @@ var bodyParser = require('body-parser');
 var jwt = require('jsonwebtoken');
 
 var app = express();
+var secureRoutes = express.Router();
 require('dotenv').config();
 
 //controllers
@@ -17,12 +18,36 @@ process.env.SECRET_KEY = "mysecretkey";
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
+app.use('/secure-api', secureRoutes);
+
 var db = require('./server/config/config.js');
 
 app.get('/api/authenticate', authenticateController.authenticate);
 app.get('/api/get-data', dataController.getData);
 
-app.post('/api/post-data', dataController.postData);
+
+//validation middleware
+secureRoutes.use(function(req, res, next){
+    var token = req.body.token || req.headers['token'];
+    //gives users 2 ways to pass token to us, either in body or in header itself
+    if (token){
+//        res.send("we have a token");
+//        //api can see that we have a token
+        jwt.verify(token, process.env.SECRET_KEY, function(err, decode){
+            if (err){
+                res.status(500).send("invalid token");
+            }else{
+                next();
+            }
+        })
+        
+    }else{
+        res.send("Please send a token");
+    }
+})
+
+secureRoutes.post('/post-data', dataController.postData);
+//need to verify said token.
 
 app.listen(9000, function(){
     console.log("server is up");
