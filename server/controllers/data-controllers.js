@@ -8,9 +8,11 @@ module.exports.getData = function(req, res){
 }
 
 module.exports.postData = function(req, res){
-    var person = new Person(req.body);
-    person.save(function(err){
-        if(err) throw err;
+    const firstName = req.body.firstName;
+    const lastName = req.body.lastName;
+    
+    Person.query('INSERT INTO person (firstName, lastName) VALUES(?, ?)', [firstName, lastName], function (err, results, fields) {
+        if (err) throw err;
         res.status(200).send("You have added a new person");
     })
 }

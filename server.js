@@ -19,13 +19,7 @@ var dummyData = [];
 
 app.get('/api/get-data', dataController.getData);
 
-app.post('/api/post-data', function(req, res){
-    var newData = req.body.data;
-    //storing the post data
-    dummyData.push(newData);
-    res.json({data: dummyData});
-    //sending response back to client
-});
+app.post('/api/post-data', dataController.postData);
 
 app.listen(9000, function(){
     console.log("server is up");
